@@ -36,23 +36,23 @@ services:
     networks:
       - sql-net
 
-    portainer:
-        image: portainer/portainer-ce:latest
-        container_name: portainer
-        restart: unless-stopped
-        security_opt:
-        - no-new-privileges:true
-        networks:
-        - traefik-public
-        volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - /var/run/docker.sock:/var/run/docker.sock:ro
-        - ./portainer-data:/data
-        labels:
-        - 'traefik.enable=true'
-        - 'traefik.http.routers.portainer.entrypoints=web'
-        - 'traefik.http.routers.portainer.rule=Host(`$PORTAINER_URL`)'
-        - 'traefik.http.services.portainer.loadbalancer.server.port=9000'
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    security_opt:
+    - no-new-privileges:true
+    networks:
+    - traefik-public
+    volumes:
+    - /etc/localtime:/etc/localtime:ro
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    - ./portainer-data:/data
+    labels:
+    - 'traefik.enable=true'
+    - 'traefik.http.routers.portainer.entrypoints=web'
+    - 'traefik.http.routers.portainer.rule=Host(`$PORTAINER_URL`)'
+    - 'traefik.http.services.portainer.loadbalancer.server.port=9000'
 
   phpmyadmin:
     image: phpmyadmin
