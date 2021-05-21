@@ -11,7 +11,7 @@ service ?= api
 
 all: traefik-network sql-net
 	@echo [ starting client '&' api... ]
-	docker-compose up traefik db phpmyadmin
+	docker-compose up -d traefik db phpmyadmin
 
 traefik-network:
 ifeq (,$(findstring traefik-public,$(NETWORKS)))
