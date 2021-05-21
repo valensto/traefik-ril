@@ -1,0 +1,61 @@
+version: '3.1'
+
+services:
+  traefik:
+    image: traefik:v2.4.8
+    container_name: traefik
+    ports:
+      - 80:80
+      - 443:443
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./conf/traefik.yml:/etc/traefik/traefik.yml
+    networks:
+      - traefik-public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.rule=Host(`$TRAEFIK_URL`)"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
+      - "traefik.http.routers.http-catchall.entrypoints=web"
+      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https@docker"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: $DB_NAME
+      MYSQL_USER: $DB_USERNAME
+      MYSQL_PASSWORD: $DB_PWD
+      MYSQL_ROOT_PASSWORD: $DB_ROOT_PWD
+    volumes:
+      - db:/var/lib/mysql
+    networks:
+      - sql-net
+
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    networks:
+        - traefik-public
+        - sql-net
+    environment:
+      PMA_HOST: $DB_HOST
+      MYSQL_ROOT_PASSWORD: $DB_ROOT_PWD
+    labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.phpmyadmin.tls=true"
+        - "traefik.http.routers.phpmyadmin.rule=Host(`$PHP_MY_ADMIN_URL`)"
+        - "traefik.http.routers.phpmyadmin.entrypoints=websecure"
+
+volumes:
+  db:
+
+networks:
+  sql-net:
+    external: true
+  traefik-public:
+    external: true
