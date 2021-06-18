@@ -23,6 +23,27 @@ services:
       - "traefik.http.routers.http-catchall.middlewares=redirect-to-https@docker"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
 
+  wordpress:
+    image: wordpress
+    restart: always
+    depends_on:
+      - db
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: $DB_USERNAME
+      WORDPRESS_DB_PASSWORD: $DB_PWD
+      WORDPRESS_DB_NAME: $DB_NAME
+    volumes:
+      - wordpress:/var/www/html
+    networks:
+      - traefik-public
+      - sql-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wordpress.tls=true"
+      - "traefik.http.routers.wordpress.rule=Host(`$WORDPRESS_URL`)"
+      - "traefik.http.routers.wordpress.entrypoints=websecure"
+
   db:
     image: mysql:5.7
     restart: always
@@ -61,7 +82,7 @@ services:
         - traefik-public
         - sql-net
     environment:
-      PMA_HOST: $DB_HOST
+      PMA_HOST: db
       MYSQL_ROOT_PASSWORD: $DB_ROOT_PWD
     labels:
         - "traefik.enable=true"
