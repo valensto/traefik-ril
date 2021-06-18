@@ -92,6 +92,7 @@ services:
 
 volumes:
   db:
+  wordpress:
 
 networks:
   sql-net:
